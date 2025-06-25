@@ -19,16 +19,16 @@ const Block = memo(({ data }) => {
   return (
     <div
       onContextMenu={handle}
-      className="p-2 bg-green-200 rounded cursor-pointer"
+      className="p-2 bg-white rounded shadow border"
     >
       {data.label}
     </div>
   );
 });
 
-const Types = {
-  blockB: Block,
+const nodeTypes = {
   blockA: Block,
+  blockB: Block,
 };
 
 let id = 0;
@@ -38,6 +38,7 @@ const Flow = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlow, setReactFlow] = useState(null);
+  const [droppedBlocks, setDroppedBlocks] = useState([]);
 
   const onConnect = useCallback(
     (params) => setEdges((e) => addEdge(params, e)),
@@ -56,14 +57,16 @@ const Flow = () => {
         y: event.clientY - bounds.top,
       });
 
-      const New = {
+      const label = type === 'blockA' ? 'Block A' : 'Block B';
+      const newNode = {
         id: getId(),
         type,
         position,
-        data: { label: type === 'blockA' ? 'Block A' : 'Block B' },
+        data: { label },
       };
 
-      setNodes((nds) => [...nds, New]);
+      setNodes((nds) => [...nds, newNode]);
+      setDroppedBlocks((prev) => [...prev, label]); 
     },
     [reactFlow]
   );
@@ -75,6 +78,7 @@ const Flow = () => {
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
+    
       <div style={{ width: '20%', padding: 16, borderRight: '1px solid #ccc' }}>
         <div
           style={{ background: '#9ae6b4', padding: 8, marginBottom: 8, borderRadius: 4, cursor: 'move' }}
@@ -94,9 +98,17 @@ const Flow = () => {
         >
           Block B
         </div>
+
+        <div style={{ marginTop: 20 }}>
+          <h4 style={{ fontWeight: 'bold' }}>Dropped Blocks:</h4>
+          <ul style={{ listStyle: 'disc', paddingLeft: 20 }}>
+            {droppedBlocks.map((label, index) => (
+              <li key={index}>{label}</li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-     
       <div style={{ flexGrow: 1 }}>
         <ReactFlowProvider>
           <div style={{ width: '100%', height: '100%' }}>
@@ -109,7 +121,7 @@ const Flow = () => {
               onDrop={onDrop}
               onDragOver={onDragOver}
               onInit={setReactFlow}
-              nodeTypes={Types}
+              nodeTypes={nodeTypes}
               fitView
             >
               <MiniMap />
