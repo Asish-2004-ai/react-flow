@@ -32,7 +32,7 @@ const Types = {
 };
 
 let id = 0;
-const getId = () => `node_${id++}`;
+const getId = () => `${id++}`;
 
 const Flow = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -40,7 +40,7 @@ const Flow = () => {
   const [reactFlow, setReactFlow] = useState(null);
 
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
+    (params) => setEdges((e) => addEdge(params, e)),
     [setEdges]
   );
 
