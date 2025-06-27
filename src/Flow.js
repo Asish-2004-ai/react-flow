@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo, memo } from 'react';
+import React, { useCallback, useState, memo } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   addEdge,
@@ -12,7 +12,6 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-// Block component with connection handles and right-click alert
 const Block = memo(({ data }) => {
   const handleRightClick = (e) => {
     e.preventDefault();
@@ -31,7 +30,6 @@ const Block = memo(({ data }) => {
   );
 });
 
-// Memoized nodeTypes (important to avoid React Flow warning)
 const nodeTypes = {
   blockA: Block,
   blockB: Block,
@@ -46,23 +44,31 @@ const Flow = () => {
   const [reactFlow, setReactFlow] = useState(null);
   const [droppedBlocks, setDroppedBlocks] = useState([]);
 
- const onConnect = useCallback(
-  (params) =>
-    setEdges((eds) =>
-      addEdge(
-        {
-          ...params,
-          type: 'straight', // 👈 straight line
-          markerEnd: {
-            type: 'arrowclosed', // 👈 arrow at the end
-          },
-        },
-        eds
-      )
-    ),
-  [setEdges]
-);
+  const onConnect = useCallback(
+    (params) => {
+      const sourceNode = nodes.find((n) => n.id === params.source);
+      const targetNode = nodes.find((n) => n.id === params.target);
 
+      if (
+        sourceNode?.type === 'blockA' &&
+        targetNode?.type === 'blockB'
+      ) {
+        setEdges((eds) =>
+          addEdge(
+            {
+              ...params,
+              type: 'straight',
+              markerEnd: { type: 'arrowclosed' },
+            },
+            eds
+          )
+        );
+      } else {
+        alert('Only connections from Block A to Block B are allowed!');
+      }
+    },
+    [nodes, setEdges]
+  );
 
   const onDrop = useCallback(
     (event) => {
@@ -96,7 +102,6 @@ const Flow = () => {
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
-      {/* Sidebar */}
       <div style={{ width: '20%', padding: 16, borderRight: '1px solid #ccc' }}>
         <div
           style={{
@@ -138,7 +143,6 @@ const Flow = () => {
         </div>
       </div>
 
-      {/* React Flow Canvas */}
       <div style={{ flexGrow: 1 }}>
         <ReactFlowProvider>
           <div style={{ width: '100%', height: '100%' }}>
